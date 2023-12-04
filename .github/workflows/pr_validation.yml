@@ -2,8 +2,6 @@ name: Check 'Stack' Pull Request Format
 
 on:
   pull_request:
-    branches:
-      - stack/*
 
 jobs:
   check-format:
@@ -15,13 +13,9 @@ jobs:
           fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
 
       # Example 1
-      - name: Get changed files
+      - name: Get all changed files
         id: changed-files
         uses: tj-actions/changed-files@v40
-        
-        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
-        # with:
-        #   since_last_remote_commit: true 
 
       - name: List all changed files
         run: |
