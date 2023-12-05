@@ -2,28 +2,58 @@ name: Check 'Stack' Pull Request Format
 
 on:
   pull_request:
+    types: 
+      - opened
+      - synchronize
 
 jobs:
   check-format:
-    runs-on: ubuntu-latest  # windows-latest || macos-latest
-    name: Test changed-files
+    name: Validate Stack PR
+    
+    # Only run if the PR branch starts with `stack/` 
+    if: startsWith(github.head_ref, 'stack/')
+
+    runs-on: ubuntu-latest  # can also change to: windows-latest || macos-latest
+    
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
 
-      # Example 1
       - name: Get all changed files
         id: changed-files
         uses: tj-actions/changed-files@v40
-        with:
-          files: |
-            stacks/*/index.test.ts
-            stacks/*/index.ts
-            stacks/*/index.test.txt
-            
+
       - name: List all changed files
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             echo "$file was changed"
+          done
+
+      - name: Fail if unexpected files were changed
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ ! "$file" =~ ^(stacks/*/index.test.ts|stacks/*/index.ts|stacks/*/index.test.txt)$ ]]; then
+              echo "😡 File '$file' was changed. This is not allowed in a stack Pull Request."
+              echo ""
+              echo "You're only allowed to change the following:"
+              echo "  - stacks/*/index.ts"
+              echo "  - stacks/*/index.test.ts"
+              echo "  - stacks/*/index.test.txt"
+              exit 1
+            fi
+          done
+
+      - name: Fail if more than one (1) stack was made
+        run: |
+          declare -A file_counts
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            base_name=$(basename $file)
+            ((file_counts["$base_name"]++))
+          done
+          for file in "${!file_counts[@]}"; do
+            if ((file_counts["$file"] > 1)); then
+              echo "😡 More than one file of type '$file' was changed. You should only make 1 stack per Pull Request."
+              exit 1
+            fi
           done
