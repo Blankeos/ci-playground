@@ -33,7 +33,7 @@ jobs:
       - name: Fail if unexpected files were changed
         run: |
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [[ ! "$file" =~ ^(stacks/[^/]*/index.test.ts|stacks/[^/]*/index.ts|stacks/[^/]*/index.test.txt|.github.workflows/pr_validation.yml)$ ]]; then
+            if [[ ! "$file" =~ ^(stacks/[^/]*/index.test.ts|stacks/[^/]*/index.ts|stacks/[^/]*/index.test.txt)$ ]]; then
               echo "😡 File '$file' was changed. This is not allowed in a stack Pull Request."
               echo ""
               echo "You're only allowed to change the following:"
