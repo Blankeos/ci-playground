@@ -46,15 +46,13 @@ jobs:
 
       - name: Fail if more than one (1) stack was made
         run: |
-          files=(${{ steps.changed-files.outputs.all_changed_files }})
           file_counts=()
 
-          for file in "${files[@]}"; do
-            base_name=$(basename "$file")
-            if [[ -n "${file_counts["$base_name"]}" ]]; then
-              ((file_counts["$base_name"]++))
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ -n "${file_counts["$file"]}" ]]; then
+              ((file_counts["$file"]++))
             else
-              file_counts["$base_name"]=1
+              file_counts["$file"]=1
             fi
           done
 
