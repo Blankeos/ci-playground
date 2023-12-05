@@ -46,20 +46,7 @@ jobs:
 
       - name: Fail if more than one (1) stack was made
         run: |
-          file_counts=()
-
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [[ -n "${file_counts["$file"]}" ]]; then
-              ((file_counts["$file"]++))
-            else
-              file_counts["$file"]=1
-            fi
-          done
-
-          for file in "${!file_counts[@]}"; do
-            count=${file_counts["$file"]}
-            if ((count > 1)); then
-              echo "😡 More than one file of type '$file' was changed. You should only make 1 stack per Pull Request."
-              exit 1
-            fi
-          done
+          if ((${{ steps.changed-files.outputs.all_changed_files_count }} > 3)); then
+            echo "Detected more than 1 stack. Please make only 1 stack per pull request."
+            exit 1
+          fi
